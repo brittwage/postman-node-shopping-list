@@ -1,6 +1,13 @@
+// TODO rewrite this using pipe
 var http = require('http')
 var url = require('url')
+var join = require('path').join
+
+var fs = require('fs')
+var qs = require('querystring')
 var items = []
+
+var root = __dirname
 
 // HTTP REQUEST
 // localhost:9000
@@ -38,11 +45,12 @@ var server = http.createServer(function(req, res){
       // the client must READ data from the items array
       // thus, the server must iterate over the data in the items
       // aray and write this to the response object
+      res.write('<!DOCTYPE html>\n<html lang="en">\n<body>')
+      res.write('<ul>')
       items.forEach(function(item, index){
-        res.write('BEGIN')
-        res.write(index + '. ' + item + '\n')
+        res.write('<li>' + item + '</li>')
       })
-      res.end('END')
+      res.end('</ul>\n</body>\n</html>')
       break
 
     case 'DELETE':
