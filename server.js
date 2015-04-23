@@ -31,27 +31,43 @@ var server = http.createServer(function(req, res){
       var item = ''
       // for every data event of the `req` parameter object we append the string 
       // chunk to the string stored in the variable item
+      req.setEncoding('utf8')
       req.on('data', function(chunk){
         item += chunk
       })
       // on the end event of the `req` object
       req.on('end', function(){
-        items.push(item)
-        res.end(item + ' added\n')
+        var obj = qs.parse(item)
+        items.push(obj.item)
+        res.end(obj.item + ' added\n')
+        res.end()
       })
       break
 
     case 'GET':
-      // the client must READ data from the items array
-      // thus, the server must iterate over the data in the items
-      // aray and write this to the response object
-      res.write('<!DOCTYPE html>\n<html lang="en">\n<body>')
-      res.write('<ul>')
-      items.forEach(function(item, index){
-        res.write('<li>' + item + '</li>')
-      })
-      res.end('</ul>\n</body>\n</html>')
-      break
+      if (req.url === '/input'){
+        // var url = url.parse(req.url)
+        var filePath = join(root, 'index.html')
+        var fileStream = fs.createReadStream(filePath)
+        fileStream.pipe(res)
+        fileStream.on('error', function(err){
+          res.statusCode = 500
+          res.end('Internal Server Error')
+        })
+        break
+
+      } else {
+        // the client must READ data from the items array
+        // thus, the server must iterate over the data in the items
+        // aray and write this to the response object
+        res.write('<!DOCTYPE html>\n<html lang="en">\n<body>')
+        res.write('<ul>')
+        items.forEach(function(item, index){
+          res.write('<li>' + item + '</li>')
+        })
+        res.end('</ul>\n</body>\n</html>')
+        break
+      }
 
     case 'DELETE':
       // delete an item at a given index in the `items` array
